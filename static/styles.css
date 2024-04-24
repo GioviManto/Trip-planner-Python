@@ -1,0 +1,51 @@
+/* styles.css, this is the standard CSS that we'll be applied on our templates*/
+
+body {
+    font-family: Arial, sans-serif;
+    color: cornflowerblue;
+    font-size: 1em;
+    margin-top: 30px;
+    font-weight: bold;
+    text-align: left;
+    text-decoration: wavy;
+    background-color: #f7f7e3
+}
+
+h1 {
+    font-family: Arial, sans-serif;
+    color: rgb(56, 119, 234);
+    font-size: 60px;
+    margin-top: 30px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: wavy;
+}
+
+button {
+    display: inline-block;
+    margin-top: -8px;
+    margin-left: 20px;
+    font-size: 1em;
+    height: 40px;
+    width: 100px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: cornflowerblue;
+    color: white;
+    transition: background-color 0.3s;
+    vertical-align: top;
+}
+
+button.autoFitButton {
+    width: auto;
+    display: inline-block;
+    padding: 10px; 
+    margin-top: -8px;
+    margin-left: 20px;
+}
+
+button:hover {
+    background-color: whitesmoke;
+    color: cornflowerblue
+}
