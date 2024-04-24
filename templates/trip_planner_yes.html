@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Planner</title>
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            margin: 0;
+        }
+
+        h1,
+        h2 {
+            color: cornflowerblue;
+            margin-right: 10px;
+            margin-left: 10px;
+        }
+
+        #content {
+            width: 100%;
+            max-width: 1200px; /* Set your desired maximum width */
+            margin-top: 20px;
+        }
+
+        #tripForm {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns for labels and form elements */
+            gap: 10px; /* Add some gap between columns */
+            width: 100%; /* 100% width for the form */
+            box-sizing: border-box;
+        }
+
+        /* Adjust form input styles */
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        /* Map styles */
+        #map {
+            width: 100%; /* 100% width for the map */
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Additional styles for your content */
+        .content {
+            max-width: 800px; /* Adjust the width based on your design */
+            padding: 20px; /* Add padding to the content for better readability */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+        }
+
+        /* Adjust button styling */
+        .autoFitButton {
+            width: fit-content;
+            margin-top: 10px;
+        }
+    </style>
+    </style>
+
+    </style>
+</head>
+
+<body>
+
+    <h1>Trip Planner</h1>
+    <div id="content">
+        <form id="tripForm">
+            <label for="destination">Destination: [write a destination in Italian] </label>
+            <input type="text" id="destination" name="destination" required>
+        
+            <label for="startDate">Start Date: [format es: 12 January 2024]</label>
+            <input type="text" id="startDate" name="startDate" required>
+        
+            <label for="endDate">End Date: [format es: 18 January 2024]</label>
+            <input type="text" id="endDate" name="endDate" required>
+
+            <label for="Origin">Origin:</label>
+            <input type="text" id="Origin" name="Origin" required>
+        
+            <label for="budgetFlight">Budget Flight: [number]</label>
+            <input type="text" id="budgetFlight" name="budgetFlight" required>
+        
+            <label for="budgetHotel">Budget Hotel: [number]</label>
+            <input type="text" id="budgetHotel" name="budgetHotel" required>
+        
+            <label for="numberGuest">Number of Guest: [number]</label>
+            <input type="text" id="numberGuest" name="numberGuest" required>
+        
+            <button class="autoFitButton" type="button" onclick="submitDates()" id="submitDatesBtn">Plan!</button>
+            <button type="button" onclick="getDays()">Add Activity</button>
+            
+            <div id="startDateResult"></div>
+            <div id="endDateResult"></div>
+            <div id="Origin"></div>
+            <div id="budgetFlightResult"></div>
+            <div id="budgetHotelResult"></div>
+            <div id="numberGuestResult"></div>
+            <div id="dateDifference"></div>
+            <div id="hotelResults"></div>
+            <div id="activitiesResult"></div>
+            <div id="flightResults"></div>
+        
+        </form>
+
+    
+        <div id="map"></div>
+    
+    </div>
+    
+        
+
+        <script>
+            // Add event listener to start date input
+            document.getElementById('startDate').addEventListener('change', function () {
+                // Update the min attribute of the end date input to be the selected start date
+                document.getElementById('endDate').min = this.value;
+            });
+        </script>
+    
+  
+      
+        
+        
+
+    
+    
+    <script>
+        function submitDates() {
+            var destination = document.getElementById('destination').value;
+            var Origin = document.getElementById('Origin').value;
+            var startDate = document.getElementById('startDate').value;
+            var endDate = document.getElementById('endDate').value;
+            var budgetFlight = document.getElementById('budgetFlight').value;
+            var budgetHotel = document.getElementById('budgetHotel').value;
+            var numberGuest = document.getElementById('numberGuest').value;
+
+            // Submit Start Date
+            var startResultElement = document.getElementById('startDateResult');
+            startResultElement.innerHTML = 'Start Date: ' + (startDate || 'None selected');
+            console.log('Start Date:', startDate);
+            sendDateToServer(startDate, 'submitStartDateBtn');
+
+            //submit budgetFlight
+            var resultElement = document.getElementById('budgetFlight');
+            resultElement.innerHTML = 'budgetFlight: ' + (budgetFlight || 'None selected');
+            console.log('budgetFlight:', budgetFlight);
+            sendBudgetFlightToServer(budgetFlight, 'submitStartDateBtn');
+
+            //submit numberGuest
+            var resultElement = document.getElementById('numberGuest');
+            resultElement.innerHTML = 'numberGuest: ' + (numberGuest || 'None selected');
+            console.log('numberGuest:', numberGuest);
+            sendNumberGuestToServer(numberGuest, 'submitStartDateBtn');
+
+
+            // submit destination
+            var resultElement = document.getElementById('destination');
+            resultElement.innerHTML = 'destination: ' + (destination || 'None selected');
+            console.log('destination:', destination);
+            sendDestinationToServer(destination, 'submitStartDateBtn')
+
+            // submit origin
+            var resultElement = document.getElementById('Origin');
+            resultElement.innerHTML = 'Origin: ' + (Origin || 'None selected');
+            console.log('Origin:', Origin);
+            sendOriginToServer(Origin, 'submitStartDateBtn')
+            
+            // Submit End Date
+            var endResultElement = document.getElementById('endDateResult');
+            endResultElement.innerHTML = 'End Date: ' + (endDate || 'None selected');
+            console.log('End Date:', endDate);
+            sendDateToServer(endDate, 'submitStartDateBtn');
+            
+            // Submit budget hotel
+        
+            var resultElement = document.getElementById('budgetHotel');
+            resultElement.innerHTML = 'budgetHotel: ' + (budgetHotel || 'None selected');
+            console.log('budgetHotel:', budgetHotel);
+            sendBudgetHotelToServer(budgetHotel,'submitStartDateBtn');
+
+            // Display budget flight, budget hotel, and number of guests on the HTML page
+            document.getElementById('budgetFlightResult').innerHTML = 'Budget Flight: ' + (budgetFlight || 'None selected');
+            document.getElementById('budgetHotelResult').innerHTML = 'Budget Hotel: ' + (budgetHotel || 'None selected');
+            document.getElementById('numberGuestResult').innerHTML = 'Number of Guests: ' + (numberGuest || 'None selected');
+
+            
+            fetch('/day-calc', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&destination=${encodeURIComponent(destination)}&Origin=${encodeURIComponent(Origin)}&budgetFlight=${encodeURIComponent(budgetFlight)}&numberGuest=${encodeURIComponent(numberGuest)}&budgetHotel=${encodeURIComponent(budgetHotel)}`,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Server Response:', data);
+                if (data.success) {
+                    // Aggiorna l'HTML con i nuovi dati
+                    document.getElementById('dateDifference').innerHTML = `Date Difference: ${data.difference} days`;
+                    document.getElementById('hotelResults').innerHTML = `Hotel Results: ${data.hotel_results}`;
+                    document.getElementById('activitiesResult').innerHTML = `Activities: ${data.activities}`;
+                    document.getElementById('flightResults').innerHTML = `Flight Results: ${data.flight_results}`;
+                } else {
+                    console.error('Server returned an error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+            });
+        }
+           
+        
+
+        function sendDateToServer(dateValue, buttonId) {
+            var startDate = document.getElementById('startDate').value;
+            var endDate = document.getElementById('endDate').value;
+            var destination = document.getElementById('destination').value;
+            var Origin = document.getElementById('Origin').value;
+            var budgetFlight = document.getElementById('budgetFlight').value;    
+            var numberGuest = document.getElementById('numberGuest').value;
+            var budgetHotel= document.getElementById('budgetHotel').value;
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/day-calc', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log('Server Response:', xhr.responseText);
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Parsed JSON Response:', response);
+                        } catch (error) {
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        console.error('Error:', xhr.responseText);
+                    }
+
+                    
+                }
+            };
+
+        
+            xhr.send('startDate=' + encodeURIComponent(startDate) +
+                    '&endDate=' + encodeURIComponent(endDate) +
+                    '&destination=' + encodeURIComponent(destination) +
+                    '&Origin=' + encodeURIComponent(Origin) +
+                    '&budgetFlight=' + encodeURIComponent(budgetFlight) +
+                    '&numberGuest=' + encodeURIComponent(numberGuest) +
+                    '&budgetHotel=' + encodeURIComponent(budgetHotel))
+
+
+        }
+
+
+
+
+
+
+
+        
+
+        function sendDestinationToServer(destination) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/trip-planner-yes', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log('Server Response:', xhr.responseText);
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Parsed JSON Response:', response);
+                        } catch (error) {
+                            handlePlainTextResponse(xhr.responseText, 'continentResult');
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('destination=' + encodeURIComponent(destination));
+        }
+        
+
+        function sendOriginToServer(Origin) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/trip-planner-yes', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log('Server Response:', xhr.responseText);
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Parsed JSON Response:', response);
+                        } catch (error) {
+                            handlePlainTextResponse(xhr.responseText, 'continentResult');
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('Origin=' + encodeURIComponent(Origin));
+        }
+        
+        
+
+        function sendBudgetFlightToServer(budgetFlight) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/trip-planner-yes', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log('Server Response:', xhr.responseText);
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Parsed JSON Response:', response);
+                        } catch (error) {
+                            handlePlainTextResponse(xhr.responseText, 'continentResult');
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('budgetFlight=' + encodeURIComponent(budgetFlight));
+        }
+
+        function sendBudgetHotelToServer(budgetHotel) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/trip-planner-yes', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log('Server Response:', xhr.responseText);
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Parsed JSON Response:', response);
+                        } catch (error) {
+                            handlePlainTextResponse(xhr.responseText, 'continentResult');
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('budgetHotel=' + encodeURIComponent(budgetHotel));
+        }
+
+        
+
+        function sendNumberGuestToServer(numberGuest) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/trip-planner-yes', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log('Server Response:', xhr.responseText);
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Parsed JSON Response:', response);
+                        } catch (error) {
+                            handlePlainTextResponse(xhr.responseText, 'continentResult');
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('numberGuest=' + encodeURIComponent(numberGuest));
+        }
+
+
+
+        // JavaScript for the Map
+        function initMap() {
+            // Initialize the map centered at Rome
+            var map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 41.9028, lng: 12.4964 }, // Coordinates for Rome (Caput Mundi ;) )
+                zoom: 4.5
+            });
+
+            // Some Capital coordinates (latitude and longitude)
+            var capitals = [
+                    { name: 'Tokyo', lat: 35.689487, lng: 139.691711 },
+                    { name: 'Beijing', lat: 39.9042, lng: 116.4074 },
+                    { name: 'Bangkok', lat: 13.7563, lng: 100.5018 },
+                    { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
+                    { name: 'Istanbul', lat: 41.0082, lng: 28.9784 },
+                    { name: 'Lahore', lat: 31.5497, lng: 74.3436 },
+                    { name: 'Kinshasa', lat: -4.4419, lng: 15.2663 },
+                    { name: 'Lima', lat: -12.0464, lng: -77.0428 },
+                    { name: 'Bangalore', lat: 12.9716, lng: 77.5946 },
+                    { name: 'London', lat: 51.509865, lng: -0.118092 },
+                    { name: 'Paris', lat: 48.856613, lng: 2.352222 },
+                    { name: 'Berlin', lat: 52.5200, lng: 13.4050 },
+                    { name: 'Rome', lat: 41.9028, lng: 12.4964 },
+                    { name: 'New York City', lat: 40.7128, lng: -74.0060 },
+                    { name: 'Los Angeles', lat: 34.0522, lng: -118.2437 },
+                    { name: 'Rio de Janeiro', lat: -22.9068, lng: -43.1729 },
+                    { name: 'Cape Town', lat: -33.9249, lng: 18.4241 },
+                    { name: 'Sydney', lat: -33.8688, lng: 151.2093 },
+                    { name: 'Toronto', lat: 43.6532, lng: -79.3832 },
+                    { name: 'Mexico City', lat: 19.4326, lng: -99.1332 },
+                    { name: 'Buenos Aires', lat: -34.6037, lng: -58.3816 },
+                    { name: 'Nairobi', lat: -1.286389, lng: 36.817223 },
+                    { name: 'Cairo', lat: 30.0444, lng: 31.2357 },
+                    { name: 'Marrakech', lat: 31.6295, lng: -7.9811 },
+                    { name: 'Amsterdam', lat: 52.3676, lng: 4.9041 },
+                    { name: 'Moscow', lat: 55.7558, lng: 37.6176 },
+                    { name: 'Seoul', lat: 37.5665, lng: 126.9780 },
+                    { name: 'Hong Kong', lat: 22.3193, lng: 114.1694 },
+                    { name: 'Singapore', lat: 1.3521, lng: 103.8198 },
+                    { name: 'Dubai', lat: 25.276987, lng: 55.296249 },
+                    { name: 'Stockholm', lat: 59.3293, lng: 18.0686 },
+                    { name: 'Oslo', lat: 59.9139, lng: 10.7522 },
+                    { name: 'Copenhagen', lat: 55.6761, lng: 12.5683 },
+                    { name: 'Berlin', lat: 52.5200, lng: 13.4050 },
+                    { name: 'Vienna', lat: 48.8566, lng: 2.3522 },
+                    { name: 'Prague', lat: 50.0755, lng: 14.4378 },
+                    { name: 'Warsaw', lat: 52.2297, lng: 21.0122 },
+                    { name: 'Budapest', lat: 47.4979, lng: 19.0402 },
+                    { name: 'Athens', lat: 37.9838, lng: 23.7275 },
+                    { name: 'Istanbul', lat: 41.0082, lng: 28.9784 },
+                    { name: 'Jerusalem', lat: 31.7683, lng: 35.2137 },
+                    { name: 'Cape Town', lat: -33.9249, lng: 18.4241 },
+                    { name: 'Nairobi', lat: -1.286389, lng: 36.817223 },
+                    { name: 'Addis Ababa', lat: 9.1450, lng: 40.4897 },
+                    { name: 'Cairo', lat: 30.0444, lng: 31.2357 },
+                    { name: 'Casablanca', lat: 33.5731, lng: -7.5898 },
+                    { name: 'Tehran', lat: 35.6895, lng: 51.3890 },
+                    { name: 'Baghdad', lat: 33.3152, lng: 44.3661 },
+                    { name: 'Riyadh', lat: 24.7136, lng: 46.6753 },
+                ]
+
+
+            // Add markers for each capital
+            for (var i = 0; i < capitals.length; i++) {
+                var capital = capitals[i];
+                var marker = new google.maps.Marker({
+                    position: { lat: capital.lat, lng: capital.lng },
+                    map: map,
+                    title: capital.name
+                });
+            }
+        }
+        // Yes, we would like to address the map for our destinations, but we do not have lat and long  for each city in our database (4000+)
+    </script>
+
+    <!-- Google Maps API script -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-TLHALRPRztYkWv2yes8lNVZYs6Kek0o&callback=initMap"></script>
+
+        
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/styles.css">
+    <title>Get Advice</title>
+</head>
+
+<body>
+    <h2>Get Continent for Advice</h2>
+
+    <form id="continentForm">
+        <label for="continentSelect">Select Continent:</label>
+        <select id="continentSelect" name="continent">
+            <option value="" disabled selected>Select a Continent</option>
+            <option value="Asia">Asia</option>
+            <option value="Europe">Europe</option>
+            <option value="North America">North America</option>
+            <option value="South America">South America</option>
+            <option value="Oceania">Oceania</option>
+            <option value="Africa">Africa</option>
+        </select>
+        <button class="autoFitButton" type="button" onclick="submitContinent()" id="submitContinentBtn">Get Continent for Advice</button>
+    </form>
+
+    <div id="continentResult"></div>
+
+
+
+    <h2>Select Country for Advice</h2>
+
+    <form id="countryForm">
+        <label for="countrySelect">Select Country:</label>
+        <select id="countrySelect" name="country">
+            <option value="" disabled selected>Select a Country</option>
+            <!-- Countries will be dynamically added here using JavaScript -->
+        </select>
+        <button class="autoFitButton" type="button" onclick="submitCountry()" id="submitCountryBtn">Get Advice for Selected Country</button>
+    </form>
+
+    <div id="countryResult"></div>
+
+
+
+    <h2>Select Weather for Advice</h2>
+
+    <form id="weatherForm">
+        <label for="weatherSelect">Select the Weather:</label>
+        <select id="weatherSelect" name="weather">
+            <option value="" disabled selected>Select a weather</option>
+            <option value="temperate">Temperate</option>
+            <option value="hot">Hot</option>
+            <option value="cold">Cold</option>
+        </select>
+        <button class="autoFitButton" type="button" onclick="submitWeather()" id="submitWeatherBtn">Get Weather for Advice</button>
+    </form>
+
+    <div id="weatherResult"></div>
+
+
+
+    <h2>Select Geography for Advice</h2>
+
+    <form id="geographyForm">
+        <label for="geographySelect">Select the Geography:</label>
+        <select id="geographySelect" name="geography">
+            <option value="" disabled selected>Select a Geography</option>
+            <option value="urban">Urban</option>
+            <option value="coastal">Coastal</option>
+            <option value="mountainous">Mountainous</option>
+        </select>
+        <button class="autoFitButton" type="button" onclick="submitGeography()" id="submitGeographyBtn">Get Geography for Advice</button>
+    </form>
+
+    <div id="geographyResult"></div>
+
+
+    <h2>Get Advice</h2>
+    <p>Great! Now we have all the information needed to look up for the most suitable destination!</p>
+    <p>Click Go to see the result</p>
+    <button class="autoFitButton" type="button" onclick="getAdvice()" id="getAdviceBtn">Go!</button>
+
+    <script>
+
+        function submitContinent() {
+            var selectedContinent = document.getElementById('continentSelect').value;
+            // Display the selected country on the page 
+            var resultElement = document.getElementById('continentResult');
+            resultElement.innerHTML = 'Selected Continent: ' + (selectedContinent || 'None selected');
+
+            console.log('Selected Continent:', selectedContinent);  //line for debugging
+
+            sendContinentToServer(selectedContinent);
+        }
+
+        function sendContinentToServer(continent) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/advice-data', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            // Update the country dropdown 
+                            var countrySelect = document.getElementById('countrySelect');
+                            if (countrySelect) {
+                                countrySelect.innerHTML = '<option value="" disabled selected>Select a Country</option>';
+                                response.countries.forEach(function (country) {
+                                    var option = document.createElement('option');
+                                    option.value = country;
+                                    option.textContent = country;
+                                    countrySelect.appendChild(option);
+                                });
+                                // Enable the button after continent selection
+                                document.getElementById('getAdviceBtn').disabled = false;
+                            } else {
+                                console.error('Country dropdown element not found.');
+                            }
+                        } catch  {
+                            
+                        }
+                    }
+                }
+            };
+            xhr.send('continent=' + encodeURIComponent(continent));
+        }
+
+        function submitCountry() {
+            var selectedCountry = document.getElementById('countrySelect').value;
+    
+            // Display the selected country on the page 
+            var resultElement = document.getElementById('countryResult');
+            resultElement.innerHTML = 'Selected Country: ' + (selectedCountry || 'None selected');
+
+            console.log('Selected Country:', selectedCountry);  // Add this line for debugging
+
+            // Send the selected country to the server
+            sendCountryToServer(selectedCountry);
+
+            // Disable the continent button after submission
+            document.getElementById('submitCountryBtn').disabled = false;
+        }
+    
+        function sendCountryToServer(country) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/advice-data', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        try {
+                            // Try to parse the response as JSON
+                            var response = JSON.parse(xhr.responseText);
+                        } catch (error) {
+                            // Handle the case when the response is not valid JSON
+                            handlePlainTextResponse(xhr.responseText, 'continentResult');
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        // Handle error or log the response
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('country=' + encodeURIComponent(country));
+        }
+
+
+
+        function submitWeather() {
+            console.log('submitWeather function called');
+            var selectedWeather = document.getElementById('weatherSelect').value;
+            console.log('Selected Weather:', selectedWeather);
+            
+            // Display the selected country on the page 
+            var resultElement = document.getElementById('weatherResult');
+            resultElement.innerHTML = 'Selected Weather: ' + (selectedWeather || 'None selected');
+
+    
+            // Send the selected country to the server
+            sendWeatherToServer(selectedWeather);
+
+            // Disable the continent button after submission
+            document.getElementById('submitWeatherBtn').disabled = true;
+        }
+    
+        function sendWeatherToServer(weather) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/advice-data', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        try {
+                            // Try to parse the response as JSON
+                            var response = JSON.parse(xhr.responseText);
+
+                        } catch (error) {
+                            // Handle the case when the response is not valid JSON
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        // Handle error or log the response
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('weather=' + encodeURIComponent(weather));
+        }
+
+
+        function submitGeography() {
+            var selectedGeography = document.getElementById('geographySelect').value;
+    
+            // Display the selected country on the page 
+            var resultElement = document.getElementById('geographyResult');
+            resultElement.innerHTML = 'Selected Geography: ' + (selectedGeography || 'None selected');
+    
+            // Send the selected country to the server
+            sendGeographyToServer(selectedGeography);
+
+            // Disable the continent button after submission
+            document.getElementById('submitGeographyBtn').disabled = true;
+        }
+    
+        function sendGeographyToServer(geography) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/advice-data', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        try {
+                            // Try to parse the response as JSON
+                            var response = JSON.parse(xhr.responseText);
+
+                        } catch (error) {
+                            // Handle the case when the response is not valid JSON
+                            console.error('Error parsing JSON:', error);
+                        }
+                    } else {
+                        // Handle error or log the response
+                        console.error('Error:', xhr.responseText);
+                    }
+                }
+            };
+            xhr.send('geography=' + encodeURIComponent(geography));
+        }
+
+
+        function getAdvice() {
+            // Disable the button after submission
+            document.getElementById('getAdviceBtn').disabled = true;
+
+            // Get the selected data
+            var selectedContinent = document.getElementById('continentSelect').value;
+            var selectedCountry = document.getElementById('countrySelect').value;
+            var selectedWeather = document.getElementById('weatherSelect').value;
+            var selectedGeography = document.getElementById('geographySelect').value;
+
+            // Make an AJAX request to store data in the session before redirection
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/advice-data', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // Redirect to the advice-results page after storing data in the session
+                    window.location.href = 'http://127.0.0.1:5000/advice-results';
+                }
+            };
+
+            // Send the selected data to the server
+            xhr.send('continent=' + encodeURIComponent(selectedContinent) +
+                    '&country=' + encodeURIComponent(selectedCountry) +
+                    '&weather=' + encodeURIComponent(selectedWeather) +
+                    '&geography=' + encodeURIComponent(selectedGeography));
+        }
+
+
+    </script>
+    
+</body>
+
+</html>
